@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ComplaintScreen extends StatefulWidget {
-  const ComplaintScreen({super.key});
+  final String role;
+  const ComplaintScreen({super.key, required this.role});
 
   @override
   State<ComplaintScreen> createState() => _ComplaintScreenState();
@@ -146,6 +147,15 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              "What’s your complaint?",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: primary,
+              ),
+            ),
+            const SizedBox(height: 20),
             _label("Department", primary),
             _dropdown(
               items: departments,

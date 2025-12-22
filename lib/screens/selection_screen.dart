@@ -17,18 +17,47 @@ class _SelectionScreenState extends State<SelectionScreen> {
 
   final List<String> colleges = ['College A', 'College B', 'College C'];
 
+  final TextEditingController nameController = TextEditingController();
+
   void _continue() {
-    if (selectedCollege == null || selectedRole == null) {
+    // Validation
+    if (nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please enter your name")));
+      return;
+    }
+
+    if (selectedCollege == null && selectedRole == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please select college and role")),
       );
       return;
     }
 
-    if (selectedRole == "Student") {
+    if (selectedCollege == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please select college")));
+      return;
+    }
+
+    if (selectedRole == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please select role")));
+      return;
+    }
+
+    // Navigation
+    if (selectedRole == "Student" || selectedRole == "Professors") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const ComplaintScreen()),
+        MaterialPageRoute(
+          builder: (_) => ComplaintScreen(
+            role: selectedRole!, // pass Student / Professors
+          ),
+        ),
       );
     } else {
       Navigator.push(
@@ -124,6 +153,34 @@ class _SelectionScreenState extends State<SelectionScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
+                  "Your Name",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: primary.withOpacity(0.3)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        hintText: "Enter your name",
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                Text(
                   "Select Your College",
                   style: TextStyle(
                     fontSize: 16,
@@ -210,7 +267,12 @@ class _SelectionScreenState extends State<SelectionScreen> {
                       });
                     },
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: primary, width: 1.5),
+                      side: BorderSide(
+                        color: selectedRole == "Admin"
+                            ? secondary // green when selected
+                            : primary, // purple otherwise
+                        width: 1.5,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -219,7 +281,9 @@ class _SelectionScreenState extends State<SelectionScreen> {
                       "Admin",
                       style: TextStyle(
                         fontSize: 16,
-                        color: primary,
+                        color: selectedRole == "Admin"
+                            ? secondary // green text when selected
+                            : primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
