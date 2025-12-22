@@ -100,10 +100,12 @@ class _SelectionScreenState extends State<SelectionScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("UniPulse"),
+        title: const Text(
+          "UNIPULSE",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: primary,
         foregroundColor: Colors.white,
-        centerTitle: true,
       ),
       body: Center(
         child: Padding(

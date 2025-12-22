@@ -137,7 +137,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: Text("UniPulse"),
+        title: Text("UNIPULSE", style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: primary,
         foregroundColor: Colors.white,
       ),
