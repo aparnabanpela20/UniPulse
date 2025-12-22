@@ -70,16 +70,20 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
   }
 
   Widget _label(String text, Color primary) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-        color: primary,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: primary,
+        ),
       ),
     );
   }
 
+  // 🔒 unchanged
   Widget _dropdown({
     required List<String> items,
     required String? value,
@@ -111,6 +115,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
     );
   }
 
+  // 🔒 unchanged
   Widget _textBox({
     required TextEditingController controller,
     required String hint,
@@ -140,84 +145,116 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
     final theme = Theme.of(context);
     final primary = theme.primaryColor;
     final secondary = theme.colorScheme.secondary;
+
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: Text("UNIPULSE", style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/images/logo.png', height: 28),
+            const SizedBox(width: 8),
+            const Text(
+              "UNIPULSE",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
       ),
+
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Title section
             Text(
               "What’s your complaint?",
               style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
                 color: primary,
               ),
             ),
-            const SizedBox(height: 20),
-            _label("Department", primary),
-            _dropdown(
-              items: departments,
-              value: selectedDepartment,
-              hint: "Select Department",
-              onChanged: (val) {
-                setState(() {
-                  selectedDepartment = val;
-                });
-              },
-              primary: primary,
-            ),
-            const SizedBox(height: 20),
-            _label("Complaint Category", primary),
-            _dropdown(
-              items: categories,
-              value: selectedCategory,
-              hint: "Select category",
-              onChanged: (value) {
-                setState(() => selectedCategory = value);
-              },
-              primary: primary,
+            const SizedBox(height: 6),
+            Text(
+              "Share the issue so we can address it effectively.",
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            _label("Complaint", primary),
-            _textBox(
-              controller: complaintController,
-              hint: "Describe your complaint",
-              maxLines: 5,
-              primary: primary,
+            // Form container
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _label("Department", primary),
+                    _dropdown(
+                      items: departments,
+                      value: selectedDepartment,
+                      hint: "Select Department",
+                      onChanged: (val) {
+                        setState(() {
+                          selectedDepartment = val;
+                        });
+                      },
+                      primary: primary,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    _label("Complaint Category", primary),
+                    _dropdown(
+                      items: categories,
+                      value: selectedCategory,
+                      hint: "Select category",
+                      onChanged: (value) {
+                        setState(() => selectedCategory = value);
+                      },
+                      primary: primary,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    _label("Complaint", primary),
+                    _textBox(
+                      controller: complaintController,
+                      hint: "Describe your complaint",
+                      maxLines: 5,
+                      primary: primary,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    _label("Preferred Solution", primary),
+                    _textBox(
+                      controller: solutionController,
+                      hint: "Suggest a possible solution",
+                      maxLines: 3,
+                      primary: primary,
+                    ),
+                  ],
+                ),
+              ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 28),
 
-            _label("Preferred Solution", primary),
-            _textBox(
-              controller: solutionController,
-              hint: "Suggest a possible solution",
-              maxLines: 3,
-              primary: primary,
-            ),
-
-            const SizedBox(height: 30),
-
+            // Submit button
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 52,
               child: ElevatedButton(
                 onPressed: submitComplaint,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: secondary,
+                  backgroundColor: primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                 ),
                 child: const Text(
                   "Submit Complaint",

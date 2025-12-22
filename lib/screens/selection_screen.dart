@@ -1,3 +1,5 @@
+import 'package:campus_signal/widget/role_card.dart';
+
 import '/screens/admin_screen.dart';
 import 'complaint_screen.dart';
 import 'package:flutter/material.dart';
@@ -11,16 +13,13 @@ class SelectionScreen extends StatefulWidget {
 
 class _SelectionScreenState extends State<SelectionScreen> {
   String? selectedCollege;
-
   String? selectedRole;
   bool isLoading = false;
 
   final List<String> colleges = ['College A', 'College B', 'College C'];
-
   final TextEditingController nameController = TextEditingController();
 
   void _continue() {
-    // Validation
     if (nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -49,15 +48,10 @@ class _SelectionScreenState extends State<SelectionScreen> {
       return;
     }
 
-    // Navigation
     if (selectedRole == "Student" || selectedRole == "Professors") {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => ComplaintScreen(
-            role: selectedRole!, // pass Student / Professors
-          ),
-        ),
+        MaterialPageRoute(builder: (_) => ComplaintScreen(role: selectedRole!)),
       );
     } else {
       Navigator.push(
@@ -65,60 +59,6 @@ class _SelectionScreenState extends State<SelectionScreen> {
         MaterialPageRoute(builder: (_) => const AdminScreen()),
       );
     }
-  }
-
-  Widget _roleCard({
-    required IconData icon,
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Card(
-          elevation: isSelected ? 6 : 2,
-          color: isSelected
-              ? colorScheme.secondaryContainer
-              : colorScheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: isSelected
-                  ? colorScheme
-                        .secondary // green border when selected
-                  : colorScheme
-                        .outlineVariant, // subtle/no border when not selected
-              width: 2,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Column(
-              children: [
-                Icon(
-                  icon,
-                  size: 40,
-                  color: isSelected
-                      ? colorScheme.secondary
-                      : colorScheme.primary,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -129,189 +69,212 @@ class _SelectionScreenState extends State<SelectionScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "UNIPULSE",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Container(
-            width: double.infinity,
-            constraints: const BoxConstraints(maxWidth: 420),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              border: Border.all(color: primary.withOpacity(0.4), width: 1.5),
-              borderRadius: BorderRadius.circular(16),
-              color: theme.colorScheme.surface,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/images/logo.png', height: 28),
+            const SizedBox(width: 8),
+            const Text(
+              "UNIPULSE",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  "Your Name",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: primary,
+          ],
+        ),
+      ),
+
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Card(
+            elevation: 3,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Header
+                  Text(
+                    "Welcome to UniPulse",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: primary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Card(
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: primary.withOpacity(0.3)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(
-                        hintText: "Enter your name",
-                        border: InputBorder.none,
+
+                  const SizedBox(height: 24),
+
+                  // Name
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Your Name",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: primary,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: TextField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                          hintText: "Enter your name",
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                  ),
 
-                Text(
-                  "Select Your College",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: primary,
+                  const SizedBox(height: 20),
+
+                  // College
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Select Your College",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: primary,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Card(
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: primary.withOpacity(0.3)),
+                  const SizedBox(height: 8),
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          hint: const Text("Select a college"),
+                          value: selectedCollege,
+                          isExpanded: true,
+                          iconEnabledColor: primary,
+                          items: colleges.map((college) {
+                            return DropdownMenuItem(
+                              value: college,
+                              child: Text(college),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCollege = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        hint: const Text("Select a college"),
-                        value: selectedCollege,
-                        isExpanded: true,
-                        iconEnabledColor: primary,
-                        items: colleges.map((college) {
-                          return DropdownMenuItem(
-                            value: college,
-                            child: Text(college),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
+
+                  const SizedBox(height: 24),
+
+                  // Role
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Select Role",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      RoleCard(
+                        icon: Icons.person,
+                        title: "Student",
+                        isSelected: selectedRole == "Student",
+                        onTap: () {
                           setState(() {
-                            selectedCollege = value;
+                            selectedRole = "Student";
                           });
                         },
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      RoleCard(
+                        icon: Icons.school,
+                        title: "Professors",
+                        isSelected: selectedRole == "Professors",
+                        onTap: () {
+                          setState(() {
+                            selectedRole = "Professors";
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  "Select Role",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: primary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _roleCard(
-                      icon: Icons.person,
-                      title: "Student",
-                      isSelected: selectedRole == "Student",
-                      onTap: () {
+
+                  const SizedBox(height: 28),
+
+                  // Admin Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: () {
                         setState(() {
-                          selectedRole = "Student";
+                          selectedRole = "Admin";
                         });
                       },
-                    ),
-                    const SizedBox(width: 12),
-                    _roleCard(
-                      icon: Icons.school,
-                      title: "Professors",
-                      isSelected: selectedRole == "Professors",
-                      onTap: () {
-                        setState(() {
-                          selectedRole = "Professors";
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 28),
-
-                /// ADMIN BUTTON (above Continue)
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        selectedRole = "Admin";
-                      });
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: selectedRole == "Admin"
-                            ? secondary // green when selected
-                            : primary, // purple otherwise
-                        width: 1.5,
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: selectedRole == "Admin" ? secondary : primary,
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      "Admin",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: selectedRole == "Admin"
-                            ? secondary // green text when selected
-                            : primary,
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        "Admin",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: selectedRole == "Admin" ? secondary : primary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                /// CONTINUE BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _continue,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: secondary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  // Continue
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _continue,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: secondary,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text(
+                        "Continue",
+                        style: TextStyle(fontSize: 16),
                       ),
                     ),
-                    child: const Text(
-                      "Continue",
-                      style: TextStyle(fontSize: 16),
-                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -84,9 +84,12 @@ class ComplaintProvider extends ChangeNotifier {
 
   List<Complaint> getComplaintsByDuration(Duration duration) {
     final now = DateTime.now();
-    return _complaints.where((c) {
+    final filtered = _complaints.where((c) {
       return now.difference(c.createdAt) <= duration;
     }).toList();
+
+    filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return filtered;
   }
 
   List<Complaint> getTopPriorityComplaints({int limit = 3}) {
