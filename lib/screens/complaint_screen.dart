@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/complaint_provider.dart';
 
 class ComplaintScreen extends StatefulWidget {
   final String role;
@@ -14,9 +16,6 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
 
   final TextEditingController complaintController = TextEditingController();
   final TextEditingController solutionController = TextEditingController();
-
-  final Map<int, Map<String, String>> complaintsMap = {};
-  int complaintId = 0;
 
   final List<String> departments = [
     'Computer Science',
@@ -44,13 +43,19 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       return;
     }
 
-    complaintId++;
-    complaintsMap[complaintId] = {
-      "department": selectedDepartment!,
-      "category": selectedCategory!,
-      "complaint": complaintController.text,
-      "solution": solutionController.text,
-    };
+    final complaintProvider = Provider.of<ComplaintProvider>(
+      context,
+      listen: false,
+    );
+
+    complaintProvider.addComplaint(
+      complaint: complaintController.text,
+      solution: solutionController.text,
+      givenBy: "User",
+      role: widget.role,
+      department: selectedDepartment!,
+      category: selectedCategory!,
+    );
 
     complaintController.clear();
     solutionController.clear();

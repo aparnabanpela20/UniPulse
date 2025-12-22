@@ -1,8 +1,21 @@
+import './providers/complaint_provider.dart';
+
 import './screens/selection_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => ComplaintProvider())],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,8 +29,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Color(0xFF2C2C2C),
-          secondary: Color(0xFF9C27B0),
+          seedColor: Color(0xFF0D47A1),
+          secondary: Color(0xFFF2F4F7),
         ),
         scaffoldBackgroundColor: Colors.white,
       ),

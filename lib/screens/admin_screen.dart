@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/complaint_provider.dart';
+import '../models/complaint.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -10,34 +13,21 @@ class AdminScreen extends StatefulWidget {
 class _AdminScreenState extends State<AdminScreen> {
   String selectedFilter = "1 Day";
 
-  final List<Map<String, String>> topPriorityComplaints = [
-    {
-      "complaint": "Water shortage in hostel",
-      "solution": "Install additional water tanks and schedule maintenance",
-    },
-    {
-      "complaint": "Frequent power cuts in classrooms",
-      "solution": "Upgrade electrical infrastructure and backup generators",
-    },
-  ];
-
-  final List<Map<String, String>> pastComplaints = [
-    {
-      "complaint": "Library overcrowded during exams",
-      "solution": "Extend library hours and add seating",
-    },
-    {
-      "complaint": "Slow Wi-Fi in campus",
-      "solution": "Install additional routers and increase bandwidth",
-    },
-    {
-      "complaint": "Canteen hygiene issues",
-      "solution": "Regular inspections and staff training",
-    },
-  ];
-
   final Set<int> expandedTopPriority = {};
   final Set<int> expandedPast = {};
+
+  Duration _getDurationFromFilter(String filter) {
+    switch (filter) {
+      case "1 Hour":
+        return const Duration(hours: 1);
+      case "1 Day":
+        return const Duration(days: 1);
+      case "1 Week":
+        return const Duration(days: 7);
+      default:
+        return const Duration(days: 1);
+    }
+  }
 
   Widget _sectionContainer({
     required String title,
@@ -135,6 +125,16 @@ class _AdminScreenState extends State<AdminScreen> {
     final primary = theme.primaryColor;
     final secondary = theme.colorScheme.secondary;
 
+    final complaintProvider = Provider.of<ComplaintProvider>(context);
+
+    final Duration selectedDuration = _getDurationFromFilter(selectedFilter);
+
+    final List<Complaint> allComplaints = complaintProvider
+        .getComplaintsByDuration(selectedDuration);
+
+    final List<Complaint> topPriorityComplaints = complaintProvider
+        .getTopPriorityComplaints();
+
     return Scaffold(
       appBar: AppBar(
         title: Text("UNIPULSE", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -166,8 +166,8 @@ class _AdminScreenState extends State<AdminScreen> {
                   final isExpanded = expandedTopPriority.contains(index);
 
                   return _complaintCard(
-                    complaint: item["complaint"]!,
-                    solution: item["solution"]!,
+                    complaint: item.complaint,
+                    solution: item.solution,
                     isExpanded: isExpanded,
                     onToggle: () {
                       setState(() {
@@ -230,27 +230,36 @@ class _AdminScreenState extends State<AdminScreen> {
 
                   const SizedBox(height: 16),
 
-                  Column(
-                    children: List.generate(pastComplaints.length, (index) {
-                      final item = pastComplaints[index];
-                      final isExpanded = expandedPast.contains(index);
+                  allComplaints.isEmpty
+                      ? Center(
+                          child: Text(
+                            "No complaints submitted yet",
+                            style: TextStyle(color: primary),
+                          ),
+                        )
+                      : Column(
+                          children: List.generate(allComplaints.length, (
+                            index,
+                          ) {
+                            final item = allComplaints[index];
+                            final isExpanded = expandedPast.contains(index);
 
-                      return _complaintCard(
-                        complaint: item["complaint"]!,
-                        solution: item["solution"]!,
-                        isExpanded: isExpanded,
-                        onToggle: () {
-                          setState(() {
-                            isExpanded
-                                ? expandedPast.remove(index)
-                                : expandedPast.add(index);
-                          });
-                        },
-                        primary: primary,
-                        secondary: secondary,
-                      );
-                    }),
-                  ),
+                            return _complaintCard(
+                              complaint: item.complaint,
+                              solution: item.solution,
+                              isExpanded: isExpanded,
+                              onToggle: () {
+                                setState(() {
+                                  isExpanded
+                                      ? expandedPast.remove(index)
+                                      : expandedPast.add(index);
+                                });
+                              },
+                              primary: primary,
+                              secondary: secondary,
+                            );
+                          }),
+                        ),
                 ],
               ),
             ),
