@@ -16,7 +16,11 @@ class _SelectionScreenState extends State<SelectionScreen> {
   String? selectedRole;
   bool isLoading = false;
 
-  final List<String> colleges = ['College A', 'College B', 'College C'];
+  final List<String> colleges = [
+    'Guru Ghasidas Vishwavidyalaya',
+    'Chouksey Engineering College',
+    'Atal Bihari Vishwavidyalaya',
+  ];
   final TextEditingController nameController = TextEditingController();
 
   void _continue() {

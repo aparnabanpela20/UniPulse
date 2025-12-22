@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/complaint_provider.dart';
+import 'complaint_success_screen.dart';
 
 class ComplaintScreen extends StatefulWidget {
   final String role;
@@ -64,8 +65,11 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       selectedCategory = null;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Complaint submitted successfully")),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ComplaintSuccessScreen(role: widget.role),
+      ),
     );
   }
 
