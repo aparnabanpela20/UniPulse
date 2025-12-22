@@ -1,3 +1,5 @@
+enum ComplaintStatus { notStarted, working, completed }
+
 class Complaint {
   final String id;
   final String complaint;
@@ -7,6 +9,7 @@ class Complaint {
   final String department;
   final String category;
   final DateTime createdAt;
+  ComplaintStatus status;
 
   Complaint({
     required this.id,
@@ -17,5 +20,6 @@ class Complaint {
     required this.department,
     required this.category,
     required this.createdAt,
+    this.status = ComplaintStatus.notStarted,
   });
 }

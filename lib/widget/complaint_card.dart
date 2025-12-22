@@ -1,23 +1,43 @@
 import 'package:flutter/material.dart';
+import '../models/complaint.dart';
+import '../screens/complaint_detail_screen.dart';
 
 class ComplaintCard extends StatelessWidget {
-  final String complaint;
-  final String solution;
-  final bool isExpanded;
-  final VoidCallback onToggle;
+  final Complaint complaint;
   final Color primary;
   final Color secondary;
-  bool isTopPriority = false;
-  ComplaintCard({
+  final bool isTopPriority;
+
+  const ComplaintCard({
     super.key,
     required this.complaint,
-    required this.solution,
-    required this.isExpanded,
-    required this.onToggle,
     required this.primary,
     required this.secondary,
     this.isTopPriority = false,
   });
+
+  Color _statusColor(ComplaintStatus status) {
+    switch (status) {
+      case ComplaintStatus.notStarted:
+        return Colors.grey;
+      case ComplaintStatus.working:
+        return Colors.orange;
+      case ComplaintStatus.completed:
+        return Colors.green;
+    }
+  }
+
+  String _statusText(ComplaintStatus status) {
+    switch (status) {
+      case ComplaintStatus.notStarted:
+        return "Not Started";
+      case ComplaintStatus.working:
+        return "Working";
+      case ComplaintStatus.completed:
+        return "Completed";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -28,47 +48,65 @@ class ComplaintCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: isTopPriority
-              ? Border(left: BorderSide(color: Colors.redAccent, width: 4))
+              ? const Border(
+                  left: BorderSide(color: Colors.redAccent, width: 4),
+                )
               : null,
         ),
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Complaint text
             Text(
-              complaint,
+              complaint.complaint,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: onToggle,
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: secondary),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+
+            const SizedBox(height: 10),
+
+            // Status + View Details
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _statusColor(complaint.status).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _statusText(complaint.status),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: _statusColor(complaint.status),
+                    ),
                   ),
                 ),
-                child: Text(
-                  isExpanded ? "Hide Solution" : "Show Solution",
-                  style: TextStyle(color: secondary),
+                const Spacer(),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            ComplaintDetailScreen(complaint: complaint),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    "View Details",
+                    style: TextStyle(color: secondary),
+                  ),
                 ),
-              ),
+              ],
             ),
-            if (isExpanded) ...[
-              const SizedBox(height: 10),
-              Text(
-                "Preferred Solution",
-                style: TextStyle(fontWeight: FontWeight.w600, color: primary),
-              ),
-              const SizedBox(height: 4),
-              Text(solution),
-            ],
           ],
         ),
       ),
     );
-    ;
   }
 }

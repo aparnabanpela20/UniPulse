@@ -124,17 +124,8 @@ class _AdminScreenState extends State<AdminScreen> {
                   final isExpanded = expandedTopPriority.contains(index);
 
                   return ComplaintCard(
-                    complaint: item.complaint,
-                    solution: item.solution,
-                    isExpanded: isExpanded,
+                    complaint: item,
                     isTopPriority: true,
-                    onToggle: () {
-                      setState(() {
-                        isExpanded
-                            ? expandedTopPriority.remove(index)
-                            : expandedTopPriority.add(index);
-                      });
-                    },
                     primary: primary,
                     secondary: secondary,
                   );
@@ -205,16 +196,7 @@ class _AdminScreenState extends State<AdminScreen> {
                             final isExpanded = expandedPast.contains(index);
 
                             return ComplaintCard(
-                              complaint: item.complaint,
-                              solution: item.solution,
-                              isExpanded: isExpanded,
-                              onToggle: () {
-                                setState(() {
-                                  isExpanded
-                                      ? expandedPast.remove(index)
-                                      : expandedPast.add(index);
-                                });
-                              },
+                              complaint: item,
                               primary: primary,
                               secondary: secondary,
                             );

@@ -6,7 +6,7 @@ class RoleCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  RoleCard({
+  const RoleCard({
     super.key,
     required this.icon,
     required this.title,
@@ -61,6 +61,5 @@ class RoleCard extends StatelessWidget {
         ),
       ),
     );
-    ;
   }
 }
