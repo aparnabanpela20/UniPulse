@@ -1,3 +1,4 @@
+import '/screens/view_complaint_screen.dart';
 import 'package:flutter/material.dart';
 import 'selection_screen.dart';
 import 'complaint_screen.dart';
@@ -49,6 +50,18 @@ class ComplaintSuccessScreen extends StatelessWidget {
                 "It will be reviewed and resolved soon.",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ViewComplaintScreen(),
+                    ),
+                  );
+                },
+                child: const Text("View all Complaints"),
               ),
             ],
           ),

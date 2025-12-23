@@ -1,4 +1,6 @@
+import 'package:campus_signal/providers/complaint_provider.dart';
 import 'package:campus_signal/widget/role_card.dart';
+import 'package:provider/provider.dart';
 
 import '/screens/admin_screen.dart';
 import 'complaint_screen.dart';
@@ -55,7 +57,12 @@ class _SelectionScreenState extends State<SelectionScreen> {
     if (selectedRole == "Student" || selectedRole == "Professors") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => ComplaintScreen(role: selectedRole!)),
+        MaterialPageRoute(
+          builder: (_) => ComplaintScreen(
+            role: selectedRole!,
+            user: nameController.text.trim(),
+          ),
+        ),
       );
     } else {
       Navigator.push(

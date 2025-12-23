@@ -12,7 +12,7 @@ class ComplaintProvider extends ChangeNotifier {
       solution:
           'Conduct daily hygiene inspections, introduce staff hygiene training, '
           'increase cleaning staff during peak hours, and enforce strict food safety checks.',
-      givenBy: 'Aparna Sharma',
+      givenBy: 'Neha Sharma',
       role: 'Student',
       department: 'Computer Science',
       category: 'Infrastructure',

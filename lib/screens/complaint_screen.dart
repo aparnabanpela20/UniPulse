@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/complaint_provider.dart';
 import 'complaint_success_screen.dart';
+import 'view_complaint_screen.dart';
 
 class ComplaintScreen extends StatefulWidget {
   final String role;
-  const ComplaintScreen({super.key, required this.role});
+  final String user;
+  const ComplaintScreen({super.key, required this.role, required this.user});
 
   @override
   State<ComplaintScreen> createState() => _ComplaintScreenState();
@@ -52,7 +54,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
     complaintProvider.addComplaint(
       complaint: complaintController.text,
       solution: solutionController.text,
-      givenBy: "User",
+      givenBy: widget.user,
       role: widget.role,
       department: selectedDepartment!,
       category: selectedCategory!,
@@ -163,6 +165,18 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ViewComplaintScreen()),
+              );
+            },
+            icon: const Icon(Icons.list_alt),
+            tooltip: "View all complaints",
+          ),
+        ],
       ),
 
       body: SingleChildScrollView(
