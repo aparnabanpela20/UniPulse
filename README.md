@@ -6,7 +6,7 @@
 
 ## Project Overview
 
-**UniPulse** is a Flutter + Firebase–based application that allows **students and professors** to submit campus-related complaints and suggestions. Administrators receive **AI-generated insights** to prioritize and address the most important issues, enabling **data-driven decisions** in educational institutions.
+**UNIPULSE** is a Flutter + Firebase–based application that allows **students and professors** to submit campus-related complaints and suggestions. Administrators receive **AI-generated insights** to prioritize and address the most important issues, enabling **data-driven decisions** in educational institutions.
 
 ---
 
