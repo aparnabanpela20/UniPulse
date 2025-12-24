@@ -14,9 +14,7 @@ void main() {
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ComplaintProvider()),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => ComplaintProvider())],
       child: const MyApp(),
     ),
   );
@@ -33,42 +31,57 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
 
-        // Core color scheme
+        // Enhanced gradient-friendly color scheme
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0D47A1), // Deep Blue
-          primary: const Color(0xFF0D47A1),
-          secondary: const Color(0xFF1976D2), // Accent blue
-          background: const Color(0xFFF4F6FA),
+          seedColor: const Color.fromARGB(255, 30, 124, 232),
+
+          primary: const Color.fromARGB(
+            255,
+            108,
+            72,
+            255,
+          ), // Violet (ACCENT only)
+          secondary: const Color.fromARGB(255, 136, 245, 126), // Mint
+          tertiary: const Color(0xFF9A8CFF), // Soft lavender
+
+          background: const Color(0xFFF9FAFF), // Cleaner bg
           surface: Colors.white,
+          surfaceVariant: const Color(0xFFF3F4FA),
+
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
+          onSurface: const Color(0xFF1E293B),
         ),
 
-        // Global background (very important for clean look)
-        scaffoldBackgroundColor: const Color(0xFFF4F6FA),
+        // Global background with subtle gradient feel
+        scaffoldBackgroundColor: const Color(0xFFF9FAFF),
 
-        // AppBar styling (applies everywhere automatically)
+        // Enhanced AppBar with gradient support
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0D47A1),
-          foregroundColor: Colors.white,
-          elevation: 0,
+          backgroundColor: Colors.white,
+          foregroundColor: Color.fromARGB(255, 190, 60, 255),
+          elevation: 0.5,
           centerTitle: true,
         ),
 
         // Card styling (soft, modern)
         cardTheme: CardThemeData(
           color: Colors.white,
-          elevation: 2,
+          elevation: 4,
+          shadowColor: Colors.black.withOpacity(0.05),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(18),
           ),
         ),
 
         // Button styling (consistent everywhere)
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF0D47A1),
+            backgroundColor: const Color(0xFF7C73E6),
             foregroundColor: Colors.white,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
         ),

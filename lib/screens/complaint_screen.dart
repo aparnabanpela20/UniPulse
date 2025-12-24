@@ -76,12 +76,13 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
   }
 
   Widget _label(String text, Color primary) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w600,
           color: primary,
         ),
@@ -97,14 +98,25 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
     required Function(String?) onChanged,
     required Color primary,
   }) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: primary.withOpacity(0.3)),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.white, const Color(0xFFF8FAFF)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF3F51B5).withOpacity(0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(color: primary.withOpacity(0.3), width: 1),
       ),
       child: Padding(
-        padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             items: items.map((item) {
@@ -112,9 +124,13 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
             }).toList(),
             onChanged: onChanged,
             value: value,
-            hint: Text(hint),
+            hint: Text(hint, style: TextStyle(color: Colors.grey[500])),
             isExpanded: true,
             iconEnabledColor: primary,
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ),
       ),
@@ -128,19 +144,39 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
     required int maxLines,
     required Color primary,
   }) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: primary.withOpacity(0.3)),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.white, const Color(0xFFF8FAFF)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF3F51B5).withOpacity(0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(color: primary.withOpacity(0.3), width: 1),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: TextField(
           controller: controller,
           maxLines: maxLines,
           cursorColor: primary,
-          decoration: InputDecoration(hintText: hint, border: InputBorder.none),
+          style: TextStyle(
+            fontSize: 16,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: Colors.grey[500]),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          ),
         ),
       ),
     );
@@ -153,134 +189,226 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
     final secondary = theme.colorScheme.secondary;
 
     return Scaffold(
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.tertiary,
+              ],
+            ),
+          ),
+        ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/images/logo.png', height: 28),
-            const SizedBox(width: 8),
-            const Text(
+            Text(
               "UNIPULSE",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           ],
         ),
+        centerTitle: true,
+
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ViewComplaintScreen()),
-              );
-            },
-            icon: const Icon(Icons.list_alt),
-            tooltip: "View all complaints",
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ViewComplaintScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.list_alt, color: Colors.white),
+              tooltip: "View all complaints",
+            ),
           ),
         ],
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title section
-            Text(
-              "What’s your complaint?",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: primary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              "Share the issue so we can address it effectively.",
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Form container
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF8FAFF), Color(0xFFEEF2FF), Color(0xFFE0E7FF)],
+            stops: [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Title section
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white,
+                      Colors.white.withOpacity(0.9),
+                      const Color(0xFFF1F5F9),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF1A237E).withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label("Department", primary),
-                    _dropdown(
-                      items: departments,
-                      value: selectedDepartment,
-                      hint: "Select Department",
-                      onChanged: (val) {
-                        setState(() {
-                          selectedDepartment = val;
-                        });
-                      },
-                      primary: primary,
+                    Text(
+                      "What's your complaint?",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        color: primary,
+                        height: 1.2,
+                      ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    _label("Complaint Category", primary),
-                    _dropdown(
-                      items: categories,
-                      value: selectedCategory,
-                      hint: "Select category",
-                      onChanged: (value) {
-                        setState(() => selectedCategory = value);
-                      },
-                      primary: primary,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _label("Complaint", primary),
-                    _textBox(
-                      controller: complaintController,
-                      hint: "Describe your complaint",
-                      maxLines: 5,
-                      primary: primary,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _label("Preferred Solution", primary),
-                    _textBox(
-                      controller: solutionController,
-                      hint: "Suggest a possible solution",
-                      maxLines: 3,
-                      primary: primary,
+                    const SizedBox(height: 8),
+                    Text(
+                      "Share the issue so we can address it effectively.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                        height: 1.4,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
 
-            const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
-            // Submit button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: submitComplaint,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: Colors.white,
+              // Form container
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Text(
-                  "Submit Complaint",
-                  style: TextStyle(fontSize: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label("Department", primary),
+                      _dropdown(
+                        items: departments,
+                        value: selectedDepartment,
+                        hint: "Select Department",
+                        onChanged: (val) {
+                          setState(() {
+                            selectedDepartment = val;
+                          });
+                        },
+                        primary: primary,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _label("Complaint Category", primary),
+                      _dropdown(
+                        items: categories,
+                        value: selectedCategory,
+                        hint: "Select category",
+                        onChanged: (value) {
+                          setState(() => selectedCategory = value);
+                        },
+                        primary: primary,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _label("Complaint", primary),
+                      _textBox(
+                        controller: complaintController,
+                        hint: "Describe your complaint",
+                        maxLines: 5,
+                        primary: primary,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _label("Preferred Solution", primary),
+                      _textBox(
+                        controller: solutionController,
+                        hint: "Suggest a possible solution",
+                        maxLines: 3,
+                        primary: primary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 28),
+
+              // Submit button
+              Container(
+                width: double.infinity,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [secondary, const Color(0xFF6366F1)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primary.withOpacity(0.4),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: submitComplaint,
+                    borderRadius: BorderRadius.circular(16),
+                    child: const Center(
+                      child: Text(
+                        "Submit Complaint",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

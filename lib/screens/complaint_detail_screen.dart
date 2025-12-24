@@ -45,8 +45,16 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   }
 
   Widget _infoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: const Color(0xFF6366F1).withOpacity(0.1),
+            width: 0.5,
+          ),
+        ),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -54,14 +62,23 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 13,
+              style: TextStyle(
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey,
+                color: const Color(0xFF6366F1).withOpacity(0.7),
               ),
             ),
           ),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 15,
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -79,152 +96,334 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     );
 
     return Scaffold(
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.tertiary,
+              ],
+            ),
+          ),
+        ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/images/logo.png', height: 28),
-            const SizedBox(width: 8),
-            const Text(
+            Text(
               "UNIPULSE",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           ],
         ),
+        centerTitle: true,
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// 🔹 Complaint Title
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  widget.complaint.complaint,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF8FAFF), Color(0xFFEEF2FF), Color(0xFFE0E7FF)],
+            stops: [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// 🔹 Complaint Title
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white,
+                      Colors.white.withOpacity(0.9),
+                      const Color(0xFFF1F5F9),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF1A237E).withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.8),
+                      blurRadius: 10,
+                      offset: const Offset(-5, -5),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    widget.complaint.complaint,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            /// 🔹 Complaint Details
-            Card(
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    _infoRow("Submitted By", widget.complaint.givenBy),
-                    _infoRow("Role", widget.complaint.role),
-                    _infoRow("Department", widget.complaint.department),
-                    _infoRow("Category", widget.complaint.category),
-                    _infoRow(
-                      "Submitted On",
-                      DateFormat(
-                        'dd MMM yyyy • hh:mm a',
-                      ).format(widget.complaint.createdAt),
+              /// 🔹 Complaint Details
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.white, const Color(0xFFFAFBFF)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF3F51B5).withOpacity(0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
                     ),
                   ],
+                  border: Border.all(
+                    color: const Color(0xFF6366F1).withOpacity(0.1),
+                    width: 1,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _infoRow("Submitted By", widget.complaint.givenBy),
+                      _infoRow("Role", widget.complaint.role),
+                      _infoRow("Department", widget.complaint.department),
+                      _infoRow("Category", widget.complaint.category),
+                      _infoRow(
+                        "Submitted On",
+                        DateFormat(
+                          'dd MMM yyyy • hh:mm a',
+                        ).format(widget.complaint.createdAt),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            /// 🔹 Preferred Solution
-            Card(
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Preferred Solution",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: primary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.complaint.solution,
-                      style: const TextStyle(fontSize: 14),
+              /// 🔹 Preferred Solution
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFF6366F1).withOpacity(0.05),
+                      const Color(0xFF8B5CF6).withOpacity(0.05),
+                      Colors.white,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF6366F1).withOpacity(0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
                     ),
                   ],
+                  border: Border.all(
+                    color: const Color(0xFF6366F1).withOpacity(0.2),
+                    width: 1,
+                  ),
                 ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// 🔹 Status Section (Admin Action)
-            Card(
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Status",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: primary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 10,
-                      children: ComplaintStatus.values.map((s) {
-                        return ChoiceChip(
-                          label: Text(_statusText(s)),
-                          selected: status == s,
-                          selectedColor: _statusColor(s).withOpacity(0.2),
-                          labelStyle: TextStyle(
-                            color: status == s ? _statusColor(s) : Colors.black,
-                            fontWeight: FontWeight.w600,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              primary.withOpacity(0.1),
+                              secondary.withOpacity(0.1),
+                            ],
                           ),
-                          onSelected: (_) {
-                            setState(() {
-                              status = s;
-                            });
-
-                            complaintProvider.updateComplaintStatus(
-                              widget.complaint.id,
-                              s,
-                            );
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "Preferred Solution",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        widget.complaint.solution,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: theme.colorScheme.onSurface,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 20),
+
+              /// 🔹 Status Section (Admin Action)
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white,
+                      const Color(0xFFF0F4FF),
+                      const Color(0xFFE5EDFF),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF1A237E).withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: const Color(0xFF3F51B5).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              primary.withOpacity(0.1),
+                              secondary.withOpacity(0.1),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "Status",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        children: ComplaintStatus.values.map((s) {
+                          final isSelected = status == s;
+                          final statusColor = _statusColor(s);
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                status = s;
+                              });
+                              complaintProvider.updateComplaintStatus(
+                                widget.complaint.id,
+                                s,
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: isSelected
+                                    ? LinearGradient(
+                                        colors: [
+                                          statusColor.withOpacity(0.2),
+                                          statusColor.withOpacity(0.1),
+                                        ],
+                                      )
+                                    : LinearGradient(
+                                        colors: [
+                                          Colors.grey.withOpacity(0.1),
+                                          Colors.grey.withOpacity(0.05),
+                                        ],
+                                      ),
+                                borderRadius: BorderRadius.circular(25),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? statusColor.withOpacity(0.5)
+                                      : Colors.grey.withOpacity(0.3),
+                                  width: 2,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: statusColor.withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Text(
+                                _statusText(s),
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? statusColor
+                                      : Colors.grey[700],
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
