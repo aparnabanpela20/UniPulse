@@ -78,6 +78,9 @@ class _AdminScreenState extends State<AdminScreen> {
     final List<Complaint> topPriorityComplaints = complaintProvider
         .getTopPriorityComplaints();
 
+    final List<Complaint> topVotedComplaints = complaintProvider
+        .getTopVotedComplaints();
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -130,6 +133,45 @@ class _AdminScreenState extends State<AdminScreen> {
                     secondary: secondary,
                   );
                 }),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            _sectionContainer(
+              title: "Top Voted Complaints",
+              primary: primary,
+              child: Column(
+                children: topVotedComplaints.map((complaint) {
+                  return Column(
+                    children: [
+                      ComplaintCard(
+                        complaint: complaint,
+                        primary: primary,
+                        secondary: secondary,
+                      ),
+                      Row(
+                        children: [
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.arrow_drop_up,
+                            size: 20,
+                            color: Colors.blueGrey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            complaint.upvotes.toString(),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  );
+                }).toList(),
               ),
             ),
 

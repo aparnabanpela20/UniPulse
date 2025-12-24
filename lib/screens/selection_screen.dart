@@ -1,6 +1,4 @@
-import 'package:campus_signal/providers/complaint_provider.dart';
 import 'package:campus_signal/widget/role_card.dart';
-import 'package:provider/provider.dart';
 
 import '/screens/admin_screen.dart';
 import 'complaint_screen.dart';
@@ -109,7 +107,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
                 children: [
                   // Header
                   Text(
-                    "Welcome to UniPulse",
+                    "Welcome to UNIPULSE",
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,

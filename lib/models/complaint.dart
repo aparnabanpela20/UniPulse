@@ -10,6 +10,7 @@ class Complaint {
   final String category;
   final DateTime createdAt;
   ComplaintStatus status;
+  int upvotes;
 
   Complaint({
     required this.id,
@@ -21,5 +22,6 @@ class Complaint {
     required this.category,
     required this.createdAt,
     this.status = ComplaintStatus.notStarted,
+    this.upvotes = 0,
   });
 }

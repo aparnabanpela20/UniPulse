@@ -18,6 +18,7 @@ class ComplaintProvider extends ChangeNotifier {
       category: 'Infrastructure',
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
       status: ComplaintStatus.notStarted,
+      upvotes: 5,
     ),
 
     Complaint(
@@ -34,6 +35,7 @@ class ComplaintProvider extends ChangeNotifier {
       category: 'Academics',
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
       status: ComplaintStatus.working,
+      upvotes: 8,
     ),
 
     Complaint(
@@ -50,6 +52,7 @@ class ComplaintProvider extends ChangeNotifier {
       category: 'Infrastructure',
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
       status: ComplaintStatus.completed,
+      upvotes: 3,
     ),
 
     Complaint(
@@ -66,6 +69,7 @@ class ComplaintProvider extends ChangeNotifier {
       category: 'Academics',
       createdAt: DateTime.now().subtract(const Duration(hours: 10)),
       status: ComplaintStatus.working,
+      upvotes: 2,
     ),
 
     Complaint(
@@ -82,6 +86,7 @@ class ComplaintProvider extends ChangeNotifier {
       category: 'Hostel',
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
       status: ComplaintStatus.notStarted,
+      upvotes: 4,
     ),
 
     Complaint(
@@ -98,12 +103,15 @@ class ComplaintProvider extends ChangeNotifier {
       category: 'Mental Well-being',
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
       status: ComplaintStatus.completed,
+      upvotes: 1,
     ),
   ];
 
   List<Complaint> get complaints {
     return List.unmodifiable(_complaints);
   }
+
+  final Set<String> _upvotedComplaintIds = {};
 
   void addComplaint({
     required String complaint,
@@ -154,5 +162,26 @@ class ComplaintProvider extends ChangeNotifier {
       _complaints[index].status = newStatus;
       notifyListeners();
     }
+  }
+
+  void upvoteComplaint(String complaintId) {
+    if (_upvotedComplaintIds.contains(complaintId)) return;
+
+    final index = _complaints.indexWhere((c) => c.id == complaintId);
+    if (index != -1) {
+      _complaints[index].upvotes += 1;
+      _upvotedComplaintIds.add(complaintId);
+      notifyListeners();
+    }
+  }
+
+  bool hasUserUpvoted(String complaintId) {
+    return _upvotedComplaintIds.contains(complaintId);
+  }
+
+  List<Complaint> getTopVotedComplaints({int limit = 3}) {
+    final sorted = List<Complaint>.from(_complaints)
+      ..sort((a, b) => b.upvotes.compareTo(a.upvotes));
+    return sorted.take(limit).toList();
   }
 }

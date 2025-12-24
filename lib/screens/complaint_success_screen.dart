@@ -5,7 +5,7 @@ import 'complaint_screen.dart';
 
 class ComplaintSuccessScreen extends StatelessWidget {
   final String role;
-  ComplaintSuccessScreen({super.key, required this.role});
+  const ComplaintSuccessScreen({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {

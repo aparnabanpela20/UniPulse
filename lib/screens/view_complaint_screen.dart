@@ -63,6 +63,9 @@ class ViewComplaintScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final complaint = complaints[complaints.length - 1 - index];
 
+                  final provider = context.watch<ComplaintProvider>();
+                  final hasUpvoted = provider.hasUserUpvoted(complaint.id);
+
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(
@@ -82,6 +85,34 @@ class ViewComplaintScreen extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 10),
+
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  Icons.arrow_drop_up,
+                                  color: hasUpvoted
+                                      ? Colors.grey
+                                      : Colors.blueGrey,
+                                  size: 24,
+                                ),
+                                onPressed: hasUpvoted
+                                    ? null
+                                    : () {
+                                        context
+                                            .read<ComplaintProvider>()
+                                            .upvoteComplaint(complaint.id);
+                                      },
+                                tooltip: "Upvote",
+                              ),
+                              Text(
+                                complaint.upvotes.toString(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
 
                           Text(
                             "Submitted by ${complaint.givenBy} • ${complaint.department}",
