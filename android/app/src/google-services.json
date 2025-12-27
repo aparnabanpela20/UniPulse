@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "916104635578",
+    "project_id": "unipulse-63ea1",
+    "storage_bucket": "unipulse-63ea1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916104635578:android:e8e845709d58258ca84e83",
+        "android_client_info": {
+          "package_name": "com.example.campus_signal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXdVG1a-DzSjgTGWPkyYSDfTJQzceJYcs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

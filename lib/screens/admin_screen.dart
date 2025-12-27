@@ -17,7 +17,7 @@ class _AdminScreenState extends State<AdminScreen> {
   final Set<int> expandedTopPriority = {};
   final Set<int> expandedPast = {};
 
-  Duration _getDurationFromFilter(String filter) {
+  Duration? _getDurationFromFilter(String filter) {
     switch (filter) {
       case "1 Hour":
         return const Duration(hours: 1);
@@ -26,7 +26,7 @@ class _AdminScreenState extends State<AdminScreen> {
       case "1 Week":
         return const Duration(days: 7);
       default:
-        return const Duration(days: 1);
+        return null;
     }
   }
 
@@ -103,16 +103,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
     final complaintProvider = Provider.of<ComplaintProvider>(context);
 
-    final Duration selectedDuration = _getDurationFromFilter(selectedFilter);
-
-    final List<Complaint> allComplaints = complaintProvider
-        .getComplaintsByDuration(selectedDuration);
-
-    final List<Complaint> topPriorityComplaints = complaintProvider
-        .getTopPriorityComplaints();
-
-    final List<Complaint> topVotedComplaints = complaintProvider
-        .getTopVotedComplaints();
+    final Duration? selectedDuration = _getDurationFromFilter(selectedFilter);
 
     return Scaffold(
       extendBodyBehindAppBar: false,
@@ -180,59 +171,40 @@ class _AdminScreenState extends State<AdminScreen> {
                 title: "Top Priority Complaints",
                 primary: primary,
                 highlight: true,
-                child: Column(
-                  children: List.generate(topPriorityComplaints.length, (
-                    index,
-                  ) {
-                    final item = topPriorityComplaints[index];
-                    final isExpanded = expandedTopPriority.contains(index);
+                child: StreamBuilder<List<Complaint>>(
+                  stream: context.read<ComplaintProvider>().complaintsStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
 
-                    return ComplaintCard(
-                      complaint: item,
-                      isTopPriority: true,
-                      primary: primary,
-                      secondary: secondary,
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Text("No complaints found");
+                    }
+
+                    final complaints = snapshot.data!;
+
+                    complaints.sort(
+                      (a, b) => b.createdAt.compareTo(a.createdAt),
                     );
-                  }),
-                ),
-              ),
 
-              const SizedBox(height: 24),
+                    final topPriorityComplaint = complaints.take(3).toList();
 
-              _sectionContainer(
-                title: "Top Voted Complaints",
-                primary: primary,
-                child: Column(
-                  children: topVotedComplaints.map((complaint) {
                     return Column(
-                      children: [
-                        ComplaintCard(
-                          complaint: complaint,
+                      children: List.generate(topPriorityComplaint.length, (
+                        index,
+                      ) {
+                        final item = topPriorityComplaint[index];
+                        final isExpanded = expandedTopPriority.contains(index);
+
+                        return ComplaintCard(
+                          complaint: item,
                           primary: primary,
                           secondary: secondary,
-                        ),
-                        Row(
-                          children: [
-                            const SizedBox(width: 8),
-                            const Icon(
-                              Icons.arrow_drop_up,
-                              size: 20,
-                              color: Colors.blueGrey,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              complaint.upvotes.toString(),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                      ],
+                        );
+                      }),
                     );
-                  }).toList(),
+                  },
                 ),
               ),
 
@@ -284,27 +256,56 @@ class _AdminScreenState extends State<AdminScreen> {
 
                     const SizedBox(height: 16),
 
-                    allComplaints.isEmpty
-                        ? Center(
-                            child: Text(
-                              "No complaints submitted yet",
-                              style: TextStyle(color: primary),
-                            ),
-                          )
-                        : Column(
-                            children: List.generate(allComplaints.length, (
-                              index,
-                            ) {
-                              final item = allComplaints[index];
-                              final isExpanded = expandedPast.contains(index);
+                    StreamBuilder<List<Complaint>>(
+                      stream: context
+                          .read<ComplaintProvider>()
+                          .complaintsStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
 
-                              return ComplaintCard(
-                                complaint: item,
-                                primary: primary,
-                                secondary: secondary,
-                              );
-                            }),
-                          ),
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return Center(
+                            child: const Text("No complaints found"),
+                          );
+                        }
+
+                        final allComplaints = snapshot.data!;
+                        final now = DateTime.now();
+                        final duration = _getDurationFromFilter(selectedFilter);
+
+                        final filteredComplaints = duration == null
+                            ? allComplaints
+                            : allComplaints.where((c) {
+                                return now.difference(c.createdAt) <= duration;
+                              }).toList();
+
+                        if (filteredComplaints.isEmpty) {
+                          return Center(
+                            child: const Text(
+                              "No complaints found in the selected duration",
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: List.generate(filteredComplaints.length, (
+                            index,
+                          ) {
+                            final item = filteredComplaints[index];
+                            final isExpanded = expandedPast.contains(index);
+
+                            return ComplaintCard(
+                              complaint: item,
+                              primary: primary,
+                              secondary: secondary,
+                            );
+                          }),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
