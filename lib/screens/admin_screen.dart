@@ -246,6 +246,10 @@ class _AdminScreenState extends State<AdminScreen> {
                                   value: "1 Week",
                                   child: Text("Last 1 Week"),
                                 ),
+                                DropdownMenuItem(
+                                  value: "All",
+                                  child: Text("All Time"),
+                                ),
                               ],
                               onChanged: (value) {
                                 selectedFilter.value = value!;
