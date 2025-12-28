@@ -12,8 +12,7 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
-  String selectedFilter = "1 Day";
-
+  final ValueNotifier<String> selectedFilter = ValueNotifier<String>("1 Day");
   final Set<int> expandedTopPriority = {};
   final Set<int> expandedPast = {};
 
@@ -96,14 +95,19 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    selectedFilter.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.primaryColor;
     final secondary = theme.colorScheme.secondary;
 
     final complaintProvider = Provider.of<ComplaintProvider>(context);
-
-    final Duration? selectedDuration = _getDurationFromFilter(selectedFilter);
 
     return Scaffold(
       extendBodyBehindAppBar: false,
@@ -227,7 +231,7 @@ class _AdminScreenState extends State<AdminScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
-                              value: selectedFilter,
+                              value: selectedFilter.value,
                               iconEnabledColor: primary,
                               items: const [
                                 DropdownMenuItem(
@@ -244,9 +248,7 @@ class _AdminScreenState extends State<AdminScreen> {
                                 ),
                               ],
                               onChanged: (value) {
-                                setState(() {
-                                  selectedFilter = value!;
-                                });
+                                selectedFilter.value = value!;
                               },
                             ),
                           ),
@@ -256,53 +258,63 @@ class _AdminScreenState extends State<AdminScreen> {
 
                     const SizedBox(height: 16),
 
-                    StreamBuilder<List<Complaint>>(
-                      stream: context
-                          .read<ComplaintProvider>()
-                          .complaintsStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        }
+                    ValueListenableBuilder<String>(
+                      valueListenable: selectedFilter,
+                      builder: (context, filter, _) {
+                        final duration = _getDurationFromFilter(filter);
 
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return Center(
-                            child: const Text("No complaints found"),
-                          );
-                        }
+                        return StreamBuilder<List<Complaint>>(
+                          stream: context
+                              .read<ComplaintProvider>()
+                              .complaintsStream,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            }
 
-                        final allComplaints = snapshot.data!;
-                        final now = DateTime.now();
-                        final duration = _getDurationFromFilter(selectedFilter);
+                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return Center(
+                                child: const Text("No complaints found"),
+                              );
+                            }
 
-                        final filteredComplaints = duration == null
-                            ? allComplaints
-                            : allComplaints.where((c) {
-                                return now.difference(c.createdAt) <= duration;
-                              }).toList();
+                            final allComplaints = snapshot.data!;
+                            final now = DateTime.now();
 
-                        if (filteredComplaints.isEmpty) {
-                          return Center(
-                            child: const Text(
-                              "No complaints found in the selected duration",
-                            ),
-                          );
-                        }
+                            final filteredComplaints = duration == null
+                                ? allComplaints
+                                : allComplaints.where((c) {
+                                    return now.difference(c.createdAt) <=
+                                        duration;
+                                  }).toList();
 
-                        return Column(
-                          children: List.generate(filteredComplaints.length, (
-                            index,
-                          ) {
-                            final item = filteredComplaints[index];
-                            final isExpanded = expandedPast.contains(index);
+                            if (filteredComplaints.isEmpty) {
+                              return Center(
+                                child: const Text(
+                                  "No complaints found in the selected duration",
+                                ),
+                              );
+                            }
 
-                            return ComplaintCard(
-                              complaint: item,
-                              primary: primary,
-                              secondary: secondary,
+                            return Column(
+                              children: List.generate(
+                                filteredComplaints.length,
+                                (index) {
+                                  final item = filteredComplaints[index];
+                                  final isExpanded = expandedPast.contains(
+                                    index,
+                                  );
+
+                                  return ComplaintCard(
+                                    complaint: item,
+                                    primary: primary,
+                                    secondary: secondary,
+                                  );
+                                },
+                              ),
                             );
-                          }),
+                          },
                         );
                       },
                     ),

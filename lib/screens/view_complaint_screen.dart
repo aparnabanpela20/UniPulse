@@ -34,40 +34,124 @@ class ViewComplaintScreen extends StatelessWidget {
     Color primary,
     Color secondary,
   ) {
+    Color statusColor;
+    String statusText;
+
+    switch (complaint.status) {
+      case ComplaintStatus.completed:
+        statusColor = Colors.green;
+        statusText = "Completed";
+        break;
+      case ComplaintStatus.working:
+        statusColor = Colors.orange;
+        statusText = "In Progress";
+        break;
+      default:
+        statusColor = Colors.grey;
+        statusText = "Not Started";
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [primary.withOpacity(0.1), secondary.withOpacity(0.1)],
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: ListTile(
-        title: Text(
-          complaint.complaint,
-          style: TextStyle(color: primary, fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          "Status: ${_statusText(complaint.status)}",
-          style: TextStyle(
-            color: _statusColor(complaint.status),
-            fontWeight: FontWeight.w500,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 🔹 Complaint text
+          Text(
+            complaint.complaint,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+              height: 1.4,
+            ),
           ),
-        ),
-        trailing: Icon(Icons.arrow_forward_ios, color: primary),
-        onTap: () {
-          // Navigate to complaint detail screen
-        },
+
+          const SizedBox(height: 10),
+
+          // 🔹 Submitted by
+          Row(
+            children: [
+              Icon(Icons.person_outline, size: 14, color: Colors.grey.shade600),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  "Submitted by ${complaint.givenBy} • ${complaint.department}",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // 🔹 Bottom row (Upvote + Status)
+          Row(
+            children: [
+              // Upvote button
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.arrow_drop_up,
+                      size: 20,
+                      color: Colors.black54,
+                    ),
+                    Text(
+                      complaint.upvotes.toString(),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Spacer(),
+
+              // Status badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  statusText,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

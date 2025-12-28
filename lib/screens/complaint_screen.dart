@@ -57,7 +57,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       _isSubmitting = true;
     });
     try {
-      complaintProvider.addComplaint(
+      await complaintProvider.addComplaint(
         Complaint(
           complaint: complaintController.text,
           solution: solutionController.text,
@@ -68,6 +68,10 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
           createdAt: DateTime.now(),
         ),
       );
+
+      setState(() {
+        _isSubmitting = false;
+      });
 
       complaintController.clear();
       solutionController.clear();
