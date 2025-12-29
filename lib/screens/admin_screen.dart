@@ -15,6 +15,9 @@ class _AdminScreenState extends State<AdminScreen> {
   final ValueNotifier<String> selectedFilter = ValueNotifier<String>("1 Day");
   final Set<int> expandedTopPriority = {};
   final Set<int> expandedPast = {};
+  bool isAiEnabled = false;
+  bool isGeneratingAi = false;
+  Map<String, dynamic>? aiInsights;
 
   Duration? _getDurationFromFilter(String filter) {
     switch (filter) {
@@ -27,6 +30,34 @@ class _AdminScreenState extends State<AdminScreen> {
       default:
         return null;
     }
+  }
+
+  List<String> _getTopPriorityAiIds() {
+    if (!isAiEnabled || aiInsights == null) {
+      return [];
+    }
+    print("AI Insights: $aiInsights ❤️❤️");
+    return List<String>.from(aiInsights!["topPriorityComplaintIds"] ?? []);
+  }
+
+  List<Complaint> _getTopPriorityComplaints(List<Complaint> allComplaints) {
+    final aiIds = _getTopPriorityAiIds();
+
+    if (aiIds.isNotEmpty) {
+      return allComplaints.where((c) => aiIds.contains(c.id)).toList();
+    }
+
+    final unresolved = allComplaints
+        .where((c) => c.status != ComplaintStatus.completed)
+        .toList();
+
+    unresolved.sort((a, b) {
+      final upvoteCompare = b.upvotes.compareTo(a.upvotes);
+      if (upvoteCompare != 0) return upvoteCompare;
+      return b.createdAt.compareTo(a.createdAt);
+    });
+
+    return unresolved.take(3).toList();
   }
 
   Widget _sectionContainer({
@@ -77,13 +108,26 @@ class _AdminScreenState extends State<AdminScreen> {
                 ),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: primary,
-                ),
+              child: Row(
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: primary,
+                    ),
+                  ),
+                  if (isAiEnabled)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Icon(
+                        Icons.auto_awesome,
+                        size: 18,
+                        color: Colors.orange.shade400,
+                      ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
@@ -139,6 +183,52 @@ class _AdminScreenState extends State<AdminScreen> {
           ],
         ),
         centerTitle: true,
+        actions: [
+          Tooltip(
+            message: isAiEnabled
+                ? "AI Assistance Enabled"
+                : "Enable AI Assistance",
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isAiEnabled = !isAiEnabled;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    gradient: isAiEnabled
+                        ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFF4285F4), // Google Blue
+                              Color(0xFF9A4DFF), // Gemini Purple
+                              Color(0xFFDB4437), // Soft Red/Pink
+                            ],
+                          )
+                        : null,
+                    border: Border.all(
+                      color: isAiEnabled
+                          ? Colors.transparent
+                          : Colors.white.withOpacity(0.7),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.auto_awesome,
+                    size: 20,
+                    color: isAiEnabled ? Colors.white : Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
 
       body: Container(
@@ -188,12 +278,9 @@ class _AdminScreenState extends State<AdminScreen> {
 
                     final complaints = snapshot.data!;
 
-                    complaints.sort(
-                      (a, b) => b.createdAt.compareTo(a.createdAt),
+                    final topPriorityComplaint = _getTopPriorityComplaints(
+                      complaints,
                     );
-
-                    final topPriorityComplaint = complaints.take(3).toList();
-
                     return Column(
                       children: List.generate(topPriorityComplaint.length, (
                         index,
