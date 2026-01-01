@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import './providers/complaint_provider.dart';
 import './screens/selection_screen.dart';
 
@@ -17,12 +19,7 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(
-    MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => ComplaintProvider())],
-      child: const MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyAppWithProviders()));
 }
 
 class MyApp extends StatelessWidget {
@@ -92,6 +89,18 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: const SelectionScreen(),
+    );
+  }
+}
+
+class MyAppWithProviders extends StatelessWidget {
+  const MyAppWithProviders({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => ComplaintProvider())],
+      child: const MyApp(),
     );
   }
 }

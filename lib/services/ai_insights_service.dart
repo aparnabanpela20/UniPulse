@@ -5,54 +5,46 @@ class AiInsightsService {
   static const String _apikey = String.fromEnvironment('GEMINI_API_KEY');
 
   static const String _endpoint =
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+      'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
 
   Future<Map<String, dynamic>> generateInsights(
     List<Map<String, dynamic>> complaints,
   ) async {
-    if (_apikey.isEmpty) {
-      throw Exception('GEMINI_API_KEY is not provided');
-    }
+    print("🟢 generateInsights ENTERED");
+
+    // if (_apikey.isEmpty) {
+    //   throw Exception('GEMINI_API_KEY is not provided');
+    // }
 
     final prompt =
         """
-You are an AI assistant helping a college administration.
+You are an AI system.
 
-Given the following complaints (in JSON), perform these tasks:
+TASK:
+From the complaints JSON below:
 
-1. Select ONLY the TOP 3 priority complaints.
-   - Prioritize issues that are urgent, critical, or high-impact
-     (e.g. safety risks, health/hygiene issues, infrastructure failures,
-      academic disruptions, or issues affecting many students).
-   - Consider consequences if the issue is not addressed quickly.
-   - Use upvotes only as a secondary signal.
-   - Ignore trivial, low-impact, or preference-based complaints,
-     even if they have many upvotes.
-   - Prefer systemic or recurring problems.
+1. Select EXACTLY 3 complaint IDs with highest priority
+2. Group related complaints by root cause
 
-2. Group similar complaints by root cause.
-3. For each group, generate ONE combined practical solution.
-4. Generate an improved individual solution for each complaint,
-   considering the user's preferred solution if provided.
+RULES:
+- Prioritize safety, hygiene, infrastructure, academics
+- Ignore trivial issues
+- Respond with VALID JSON ONLY
+- No markdown
+- No explanation text
 
-Return STRICTLY VALID JSON in this exact format:
-
+JSON FORMAT:
 {
-  "topPriorityComplaintIds": ["id1", "id2", "id3"],
+  "topPriorityComplaintIds": ["id1","id2","id3"],
   "groups": [
     {
-      "groupTitle": "Short descriptive title",
-      "complaintIds": ["id1", "id4"],
-      "groupSolution": "Combined solution text"
+      "groupTitle": "Short title",
+      "complaintIds": ["id1","id2"]
     }
-  ],
-  "individualSolutions": {
-    "id1": "Improved solution text",
-    "id2": "Improved solution text"
-  }
+  ]
 }
 
-Complaints data:
+COMPLAINTS:
 ${jsonEncode(complaints)}
 """;
 
@@ -67,10 +59,12 @@ ${jsonEncode(complaints)}
             ],
           },
         ],
+        "generationConfig": {"temperature": 0.1, "maxOutputTokens": 4096},
       }),
     );
 
     if (response.statusCode != 200) {
+      print("❌ Gemini error ${response.statusCode}: ${response.body}");
       throw Exception("AI Insights failed: ${response.body}");
     }
 
@@ -78,7 +72,14 @@ ${jsonEncode(complaints)}
 
     // Gemini returns the JSON as text → decode again
     final text = data['candidates'][0]['content']['parts'][0]['text'];
+    print("🧾 RAW GEMINI TEXT:\n$text");
 
-    return jsonDecode(text);
+    if (!text.trim().endsWith('}')) {
+      throw Exception("Gemini returned truncated JSON");
+    }
+
+    final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();
+
+    return jsonDecode(cleaned);
   }
 }

@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
-import '../models/complaint.dart';
 import '../services/gemini_service.dart';
 import '../services/ai_insights_service.dart';
 import '../models/ai_state_model.dart';
@@ -34,29 +32,50 @@ class AiStateNotifier extends StateNotifier<AIStateModel> {
 
   //GLobal Insights for all complaints
   Future<void> fetchGlobalInsights(Map<String, dynamic> complaintsMap) async {
+    print("🟣 fetchGlobalInsights ENTERED");
+
     final newKey = _generateGlobalCacheKey(complaintsMap);
 
-    if (state.globalCacheKey == newKey && state.globalInsights != null) {
-      return;
-    }
+    // if (state.globalCacheKey == newKey && state.globalInsights != null) {
+    //   return;
+    // }
+
+    if (state.isGlobalLoading || state.globalInsights != null) return;
 
     state = state.copyWith(isGlobalLoading: true, error: null);
-
     try {
       final complaintsForAi = complaintsMap.entries.map((entry) {
-        return {'id': entry.key, ...Map<String, dynamic>.from(entry.value)};
+        final data = Map<String, dynamic>.from(entry.value);
+
+        return {
+          "id": entry.key,
+          "complaint": data["complaint"] ?? "",
+          "category": data["category"] ?? "",
+          "upVotes": data["upVotes"] ?? 0,
+          "status": data["status"]?.toString() ?? "",
+          "preferredSolution": data["preferredSolution"] ?? "",
+          "createdAt": data["createdAt"] is DateTime
+              ? (data["createdAt"] as DateTime).toIso8601String()
+              : data["createdAt"]?.toString() ?? "",
+        };
       }).toList();
 
       final insights = await _aiInsightsService.generateInsights(
         complaintsForAi,
       );
 
+      print("AI Insights received: $insights");
+
       state = state.copyWith(
         isGlobalLoading: false,
         globalInsights: insights,
         globalCacheKey: newKey,
       );
-    } catch (e) {
+    } catch (e, s) {
+      print("🔥 AI GLOBAL INSIGHTS FAILED");
+      print(e);
+      print(s);
+
       state = state.copyWith(isGlobalLoading: false, error: e.toString());
     }
   }

@@ -1,23 +1,24 @@
 import 'package:campus_signal/widget/complaint_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 import '../providers/complaint_provider.dart';
 import '../models/complaint.dart';
+import '../providers/ai_provider.dart';
 
-class AdminScreen extends StatefulWidget {
+class AdminScreen extends ConsumerStatefulWidget {
   const AdminScreen({super.key});
 
   @override
-  State<AdminScreen> createState() => _AdminScreenState();
+  ConsumerState<AdminScreen> createState() => _AdminScreenState();
 }
 
-class _AdminScreenState extends State<AdminScreen> {
+class _AdminScreenState extends ConsumerState<AdminScreen> {
   final ValueNotifier<String> selectedFilter = ValueNotifier<String>("1 Day");
   final Set<int> expandedTopPriority = {};
   final Set<int> expandedPast = {};
   bool isAiEnabled = false;
-  bool isGeneratingAi = false;
-  Map<String, dynamic>? aiInsights;
+  bool _hasTriggeredAI = false;
 
   Duration? _getDurationFromFilter(String filter) {
     switch (filter) {
@@ -32,32 +33,53 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
-  List<String> _getTopPriorityAiIds() {
-    if (!isAiEnabled || aiInsights == null) {
-      return [];
-    }
-    print("AI Insights: $aiInsights ❤️❤️");
-    return List<String>.from(aiInsights!["topPriorityComplaintIds"] ?? []);
+  void _triggerGlobalAIOnce(List<Complaint> complaints) {
+    if (!isAiEnabled || _hasTriggeredAI) return;
+
+    _hasTriggeredAI = true;
+
+    final complaintsMap = {for (var c in complaints) c.id: c.toMap()};
+    print("Triggering global ai ");
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print("Calling AI API...");
+
+      ref.read(aiProvider.notifier).fetchGlobalInsights(complaintsMap);
+    });
   }
 
-  List<Complaint> _getTopPriorityComplaints(List<Complaint> allComplaints) {
-    final aiIds = _getTopPriorityAiIds();
+  List<Complaint> getTopPriorityComplaints(List<Complaint> complaints) {
+    final aiState = ref.watch(aiProvider);
 
-    if (aiIds.isNotEmpty) {
-      return allComplaints.where((c) => aiIds.contains(c.id)).toList();
+    List<Complaint> topPriorityComplaint;
+
+    if (isAiEnabled &&
+        aiState.globalInsights != null &&
+        aiState.globalInsights!['topPriorityComplaintIds'] != null) {
+      print("Using AI to determine top priority complaints ❤️❤️");
+      final aiIds = List<String>.from(
+        aiState.globalInsights!['topPriorityComplaintIds'],
+      );
+
+      topPriorityComplaint = complaints
+          .where((c) => aiIds.contains(c.id))
+          .toList();
+    } else {
+      // fallback (same logic as before, but inline)
+      print("Using fallback to determine top priority complaints 💔💔");
+      final unresolved = complaints
+          .where((c) => c.status != ComplaintStatus.completed)
+          .toList();
+
+      unresolved.sort((a, b) {
+        final upvoteCompare = b.upvotes.compareTo(a.upvotes);
+        if (upvoteCompare != 0) return upvoteCompare;
+        return b.createdAt.compareTo(a.createdAt);
+      });
+
+      topPriorityComplaint = unresolved.take(3).toList();
     }
-
-    final unresolved = allComplaints
-        .where((c) => c.status != ComplaintStatus.completed)
-        .toList();
-
-    unresolved.sort((a, b) {
-      final upvoteCompare = b.upvotes.compareTo(a.upvotes);
-      if (upvoteCompare != 0) return upvoteCompare;
-      return b.createdAt.compareTo(a.createdAt);
-    });
-
-    return unresolved.take(3).toList();
+    return topPriorityComplaint;
   }
 
   Widget _sectionContainer({
@@ -151,8 +173,6 @@ class _AdminScreenState extends State<AdminScreen> {
     final primary = theme.primaryColor;
     final secondary = theme.colorScheme.secondary;
 
-    final complaintProvider = Provider.of<ComplaintProvider>(context);
-
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: AppBar(
@@ -194,6 +214,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 onTap: () {
                   setState(() {
                     isAiEnabled = !isAiEnabled;
+                    _hasTriggeredAI = false;
                   });
                 },
                 child: AnimatedContainer(
@@ -265,37 +286,54 @@ class _AdminScreenState extends State<AdminScreen> {
                 title: "Top Priority Complaints",
                 primary: primary,
                 highlight: true,
-                child: StreamBuilder<List<Complaint>>(
-                  stream: context.read<ComplaintProvider>().complaintsStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isAiEnabled && ref.watch(aiProvider).isGlobalLoading)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: LinearProgressIndicator(),
+                      ),
+                    StreamBuilder<List<Complaint>>(
+                      stream: context
+                          .read<ComplaintProvider>()
+                          .complaintsStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
 
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text("No complaints found");
-                    }
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const Text("No complaints found");
+                        }
 
-                    final complaints = snapshot.data!;
+                        final complaints = snapshot.data!;
+                        _triggerGlobalAIOnce(complaints);
 
-                    final topPriorityComplaint = _getTopPriorityComplaints(
-                      complaints,
-                    );
-                    return Column(
-                      children: List.generate(topPriorityComplaint.length, (
-                        index,
-                      ) {
-                        final item = topPriorityComplaint[index];
-                        final isExpanded = expandedTopPriority.contains(index);
-
-                        return ComplaintCard(
-                          complaint: item,
-                          primary: primary,
-                          secondary: secondary,
+                        final topPriorityComplaint = getTopPriorityComplaints(
+                          complaints,
                         );
-                      }),
-                    );
-                  },
+
+                        return Column(
+                          children: List.generate(topPriorityComplaint.length, (
+                            index,
+                          ) {
+                            final item = topPriorityComplaint[index];
+                            final isExpanded = expandedTopPriority.contains(
+                              index,
+                            );
+
+                            return ComplaintCard(
+                              complaint: item,
+                              primary: primary,
+                              secondary: secondary,
+                            );
+                          }),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
 
