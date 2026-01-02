@@ -1,3 +1,4 @@
+import 'package:campus_signal/widget/ai_loading_card.dart';
 import 'package:campus_signal/widget/complaint_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -160,6 +161,107 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
     );
   }
 
+  Widget _buildGroupedComplaintsSection(
+    List<Complaint> allComplaints,
+    Color primary,
+    Color secondary,
+  ) {
+    final aiState = ref.watch(aiProvider);
+
+    if (!isAiEnabled ||
+        aiState.globalInsights == null ||
+        aiState.globalInsights!['groups'] == null) {
+      return const SizedBox.shrink();
+    }
+
+    final groups =
+        List<Map<String, dynamic>>.from(
+          aiState.globalInsights!['groups'],
+        ).where((group) {
+          final complaintIds = List<String>.from(group['complaintIds']);
+          return complaintIds.length >= 2;
+        });
+
+    return _sectionContainer(
+      title: "Grouped Complaints",
+      primary: primary,
+      child: groups.isEmpty
+          ? Center(
+              child: Text(
+                "No grouped complaints found",
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            )
+          : Column(
+              children: groups.map((group) {
+                final String title = group['groupTitle'];
+                final List<String> complaintIds = List<String>.from(
+                  group['complaintIds'],
+                );
+
+                final groupComplaints = allComplaints
+                    .where((c) => complaintIds.contains(c.id))
+                    .toList();
+
+                return Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: primary.withOpacity(0.2)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primary.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 🔹 Group title
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.folder_copy_outlined,
+                            size: 18,
+                            color: primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: primary,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // 🔹 Complaints inside group
+                      Column(
+                        children: groupComplaints.map((complaint) {
+                          return ComplaintCard(
+                            complaint: complaint,
+                            primary: primary,
+                            secondary: secondary,
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+    );
+  }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -172,6 +274,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
     final theme = Theme.of(context);
     final primary = theme.primaryColor;
     final secondary = theme.colorScheme.secondary;
+    final aiState = ref.watch(aiProvider);
 
     return Scaffold(
       extendBodyBehindAppBar: false,
@@ -266,6 +369,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (isAiEnabled && aiState.isGlobalLoading) AiLoadingCard(),
               Text(
                 "Admin Dashboard",
                 style: TextStyle(
@@ -274,6 +378,15 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                   color: primary,
                 ),
               ),
+              if (isAiEnabled)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Icon(
+                    Icons.auto_awesome,
+                    size: 18,
+                    color: Colors.orange.shade400,
+                  ),
+                ),
               const SizedBox(height: 6),
               Text(
                 "Overview of campus complaints",
@@ -282,59 +395,55 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
 
               const SizedBox(height: 24),
 
-              _sectionContainer(
-                title: "Top Priority Complaints",
-                primary: primary,
-                highlight: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (isAiEnabled && ref.watch(aiProvider).isGlobalLoading)
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 12),
-                        child: LinearProgressIndicator(),
-                      ),
-                    StreamBuilder<List<Complaint>>(
-                      stream: context
-                          .read<ComplaintProvider>()
-                          .complaintsStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        }
+              StreamBuilder<List<Complaint>>(
+                stream: context.read<ComplaintProvider>().complaintsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
 
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Text("No complaints found");
-                        }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text("No complaints found");
+                  }
 
-                        final complaints = snapshot.data!;
-                        _triggerGlobalAIOnce(complaints);
+                  final complaints = snapshot.data!;
+                  _triggerGlobalAIOnce(complaints);
 
-                        final topPriorityComplaint = getTopPriorityComplaints(
-                          complaints,
-                        );
+                  final topPriorityComplaint = getTopPriorityComplaints(
+                    complaints,
+                  );
 
-                        return Column(
-                          children: List.generate(topPriorityComplaint.length, (
-                            index,
-                          ) {
-                            final item = topPriorityComplaint[index];
-                            final isExpanded = expandedTopPriority.contains(
-                              index,
-                            );
-
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 🔹 Top Priority Complaints
+                      _sectionContainer(
+                        title: "Top Priority Complaints",
+                        primary: primary,
+                        highlight: true,
+                        child: Column(
+                          children: topPriorityComplaint.map((item) {
                             return ComplaintCard(
                               complaint: item,
                               primary: primary,
                               secondary: secondary,
+                              isTopPriority: true,
                             );
-                          }),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                          }).toList(),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // 🔹 Grouped Complaints (SEPARATE SECTION)
+                      _buildGroupedComplaintsSection(
+                        complaints,
+                        primary,
+                        secondary,
+                      ),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 24),
