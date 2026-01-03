@@ -81,7 +81,7 @@ class AiStateNotifier extends StateNotifier<AIStateModel> {
   }
 
   //Per-complaint AI solution generation
-  Future<void> generaetComplaintSolution({
+  Future<void> generateComplaintSolution({
     required String complaintId,
     required Map<String, dynamic> complaintData,
   }) async {

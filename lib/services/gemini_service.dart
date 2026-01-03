@@ -5,7 +5,7 @@ class GeminiService {
   static const String _apikey = String.fromEnvironment('GEMINI_API_KEY');
 
   static const String _endpoint =
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+      'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
 
   Future<String> generateSolution({
     required String complaint,
@@ -58,6 +58,9 @@ Return ONLY the final suggested solution text.
     }
 
     final data = jsonDecode(response.body);
-    return data['candidates'][0]['content']['parts'][0]['text'];
+    final text = data['candidates'][0]['content']['parts'][0]['text'];
+
+    text.trim().replaceAll(RegExp(r'^"+|"+$'), '');
+    return text;
   }
 }

@@ -1,20 +1,28 @@
+import 'package:campus_signal/models/ai_state_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/complaint.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 import '../providers/complaint_provider.dart';
+import '../widget/ai_loading_card.dart';
+import '../providers/ai_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ComplaintDetailScreen extends StatefulWidget {
+class ComplaintDetailScreen extends ConsumerStatefulWidget {
   final Complaint complaint;
 
-  const ComplaintDetailScreen({super.key, required this.complaint});
+  ComplaintDetailScreen({super.key, required this.complaint});
 
   @override
-  State<ComplaintDetailScreen> createState() => _ComplaintDetailScreenState();
+  ConsumerState<ComplaintDetailScreen> createState() =>
+      _ComplaintDetailScreenState();
 }
 
-class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
+class _ComplaintDetailScreenState extends ConsumerState<ComplaintDetailScreen> {
   late ComplaintStatus status;
+
+  bool isAiEnabled = false;
+  bool _hasTriggeredAI = false;
 
   @override
   void initState() {
@@ -90,7 +98,9 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     final primary = theme.primaryColor;
     final secondary = theme.colorScheme.secondary;
 
-    final complaintProvider = Provider.of<ComplaintProvider>(
+    final aiState = ref.watch(aiProvider);
+
+    final complaintProvider = provider.Provider.of<ComplaintProvider>(
       context,
       listen: false,
     );
@@ -141,7 +151,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// 🔹 Complaint Title
+              // 🔹 Complaint Title
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -295,6 +305,8 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 ),
               ),
 
+              _buildAiSolutionSection(aiState, primary, secondary),
+
               const SizedBox(height: 20),
 
               /// 🔹 Status Section (Admin Action)
@@ -424,6 +436,110 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAiSolutionSection(
+    AIStateModel aiState,
+    Color primary,
+    Color secondary,
+  ) {
+    final complaintId = widget.complaint.id;
+
+    final isGenerating = aiState.generatingSolutions.contains(complaintId);
+    final aiSolution = aiState.complaintSolutions[complaintId];
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            primary.withOpacity(0.05),
+            secondary.withOpacity(0.05),
+            Colors.white,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primary.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// Header
+            Row(
+              children: [
+                Icon(Icons.auto_awesome, color: Colors.orange.shade400),
+                const SizedBox(width: 8),
+                Text(
+                  "AI Suggested Solution",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: primary,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            /// Loading
+            if (isGenerating) const AiLoadingCard(),
+
+            /// AI Solution Text
+            if (!isGenerating && aiSolution != null)
+              Text(
+                aiSolution,
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.5,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+
+            /// Generate Button
+            if (!isGenerating && aiSolution == null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    ref
+                        .read(aiProvider.notifier)
+                        .generateComplaintSolution(
+                          complaintId: complaintId,
+                          complaintData: {
+                            "complaint": widget.complaint.complaint,
+                            "category": widget.complaint.category,
+                            "preferredSolution": widget.complaint.solution,
+                          },
+                        );
+                  },
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text("Generate AI Solution"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
