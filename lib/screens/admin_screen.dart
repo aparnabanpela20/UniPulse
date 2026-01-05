@@ -1,3 +1,4 @@
+import 'package:campus_signal/models/ai_state_model.dart';
 import 'package:campus_signal/widget/ai_loading_card.dart';
 import 'package:campus_signal/widget/complaint_card.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   final Set<int> expandedPast = {};
   bool isAiEnabled = false;
   bool _hasTriggeredAI = false;
+
+  static const double kSectionHeight = 600;
 
   Duration? _getDurationFromFilter(String filter) {
     switch (filter) {
@@ -87,10 +90,11 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
     required String title,
     required Color primary,
     required Widget child,
-    bool highlight = false,
+    bool highlight = true,
   }) {
     return Container(
       width: double.infinity,
+      height: kSectionHeight, // ⭐ SAME HEIGHT FOR ALL SECTIONS
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         gradient: highlight
@@ -103,10 +107,10 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                   Colors.white.withOpacity(0.9),
                 ],
               )
-            : LinearGradient(
+            : const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Colors.white, const Color(0xFFF8FAFF)],
+                colors: [Colors.white, Color(0xFFF8FAFF)],
               ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -123,6 +127,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 🔹 Header (fixed)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
@@ -153,8 +158,27 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                 ],
               ),
             ),
+
             const SizedBox(height: 16),
-            child,
+
+            // 🔥 Scrollable content area
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final ScrollController controller = ScrollController();
+
+                  return Scrollbar(
+                    controller: controller,
+                    thumbVisibility: true,
+                    child: SingleChildScrollView(
+                      controller: controller,
+                      physics: const BouncingScrollPhysics(),
+                      child: child,
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -223,20 +247,30 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 🔹 Group title
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.start,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           Icon(
                             Icons.folder_copy_outlined,
                             size: 18,
                             color: primary,
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: primary,
+
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width - 120,
+                            ),
+                            child: Text(
+                              title,
+                              softWrap: true,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: primary,
+                                height: 1.4,
+                              ),
                             ),
                           ),
                         ],
@@ -369,28 +403,33 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (isAiEnabled && aiState.isGlobalLoading) AiLoadingCard(),
-              Text(
-                "Admin Dashboard",
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  color: primary,
-                ),
-              ),
-              if (isAiEnabled)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Icon(
-                    Icons.auto_awesome,
-                    size: 18,
-                    color: Colors.orange.shade400,
+              _buildAiGlobalStatus(aiState, primary),
+              Row(
+                children: [
+                  Text(
+                    "Admin Dashboard",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
+                      color: primary,
+                    ),
                   ),
-                ),
+                  if (isAiEnabled)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Icon(
+                        Icons.auto_awesome,
+                        size: 18,
+                        color: Colors.orange.shade400,
+                      ),
+                    ),
+                ],
+              ),
               const SizedBox(height: 6),
               Text(
                 "Overview of campus complaints",
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                textAlign: TextAlign.center,
               ),
 
               const SizedBox(height: 24),
@@ -564,5 +603,50 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildAiGlobalStatus(AIStateModel aiState, Color primary) {
+    if (!isAiEnabled) return const SizedBox.shrink();
+
+    // ⏳ AI loading
+    if (aiState.isGlobalLoading) {
+      return const AiLoadingCard();
+    }
+
+    // ✅ AI ready
+    if (aiState.globalInsights != null) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF6366F1).withOpacity(0.15),
+              const Color(0xFF8B5CF6).withOpacity(0.15),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.auto_awesome, color: Color(0xFF6366F1), size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "AI insights applied across the dashboard",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF4F46E5),
+                ),
+              ),
+            ),
+            const Icon(Icons.check_circle, color: Colors.green, size: 20),
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }

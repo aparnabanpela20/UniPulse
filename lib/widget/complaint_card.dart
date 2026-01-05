@@ -21,7 +21,7 @@ class ComplaintCard extends StatelessWidget {
       case ComplaintStatus.notStarted:
         return Colors.grey;
       case ComplaintStatus.working:
-        return Colors.orange;
+        return Colors.orangeAccent;
       case ComplaintStatus.completed:
         return Colors.green;
     }

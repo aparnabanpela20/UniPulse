@@ -35,7 +35,7 @@ class _ComplaintDetailScreenState extends ConsumerState<ComplaintDetailScreen> {
       case ComplaintStatus.notStarted:
         return Colors.grey;
       case ComplaintStatus.working:
-        return Colors.orange;
+        return Colors.orangeAccent;
       case ComplaintStatus.completed:
         return Colors.green;
     }
@@ -156,37 +156,37 @@ class _ComplaintDetailScreenState extends ConsumerState<ComplaintDetailScreen> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
                     colors: [
+                      const Color(0xFF6366F1).withOpacity(0.05),
+                      const Color(0xFF8B5CF6).withOpacity(0.05),
                       Colors.white,
-                      Colors.white.withOpacity(0.9),
-                      const Color(0xFFF1F5F9),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF1A237E).withOpacity(0.1),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.8),
-                      blurRadius: 10,
-                      offset: const Offset(-5, -5),
+                      color: const Color(0xFF6366F1).withOpacity(0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
                     ),
                   ],
+                  border: Border.all(
+                    color: const Color(0xFF6366F1).withOpacity(0.2),
+                    width: 1,
+                  ),
                 ),
+
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
                     widget.complaint.complaint,
                     style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onSurface,
-                      height: 1.4,
+                      height: 1,
                     ),
                   ),
                 ),
@@ -194,50 +194,6 @@ class _ComplaintDetailScreenState extends ConsumerState<ComplaintDetailScreen> {
 
               const SizedBox(height: 16),
 
-              /// 🔹 Complaint Details
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Colors.white, const Color(0xFFFAFBFF)],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF3F51B5).withOpacity(0.1),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                  border: Border.all(
-                    color: const Color(0xFF6366F1).withOpacity(0.1),
-                    width: 1,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      _infoRow("Submitted By", widget.complaint.givenBy),
-                      _infoRow("Role", widget.complaint.role),
-                      _infoRow("Department", widget.complaint.department),
-                      _infoRow("Category", widget.complaint.category),
-                      _infoRow(
-                        "Submitted On",
-                        DateFormat(
-                          'dd MMM yyyy • hh:mm a',
-                        ).format(widget.complaint.createdAt),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              /// 🔹 Preferred Solution
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -305,9 +261,12 @@ class _ComplaintDetailScreenState extends ConsumerState<ComplaintDetailScreen> {
                 ),
               ),
 
+              const SizedBox(height: 16),
+
+              /// 🔹 Preferred Solution
               _buildAiSolutionSection(aiState, primary, secondary),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               /// 🔹 Status Section (Admin Action)
               Container(
@@ -338,7 +297,7 @@ class _ComplaintDetailScreenState extends ConsumerState<ComplaintDetailScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -365,70 +324,131 @@ class _ComplaintDetailScreenState extends ConsumerState<ComplaintDetailScreen> {
                       ),
                       const SizedBox(height: 16),
                       Wrap(
-                        spacing: 12,
-                        runSpacing: 8,
+                        spacing: 10,
+                        runSpacing: 10,
+                        alignment: WrapAlignment.center,
                         children: ComplaintStatus.values.map((s) {
                           final isSelected = status == s;
-                          final statusColor = _statusColor(s);
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                status = s;
-                              });
-                              complaintProvider.updateComplaintStatus(
-                                widget.complaint.id,
-                                s,
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: isSelected
-                                    ? LinearGradient(
-                                        colors: [
-                                          statusColor.withOpacity(0.2),
-                                          statusColor.withOpacity(0.1),
-                                        ],
-                                      )
-                                    : LinearGradient(
-                                        colors: [
-                                          Colors.grey.withOpacity(0.1),
-                                          Colors.grey.withOpacity(0.05),
-                                        ],
-                                      ),
-                                borderRadius: BorderRadius.circular(25),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? statusColor.withOpacity(0.5)
-                                      : Colors.grey.withOpacity(0.3),
-                                  width: 2,
+                          final color = _statusColor(s);
+
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOut,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(30),
+                              onTap: () {
+                                setState(() => status = s);
+                                complaintProvider.updateComplaintStatus(
+                                  widget.complaint.id,
+                                  s,
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 12,
                                 ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: statusColor.withOpacity(0.3),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Text(
-                                _statusText(s),
-                                style: TextStyle(
+                                decoration: BoxDecoration(
+                                  gradient: isSelected
+                                      ? LinearGradient(
+                                          colors: [
+                                            color.withOpacity(0.25),
+                                            color.withOpacity(0.15),
+                                          ],
+                                        )
+                                      : null,
                                   color: isSelected
-                                      ? statusColor
-                                      : Colors.grey[700],
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                                      ? null
+                                      : Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? color
+                                        : Colors.grey.shade200,
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: color.withOpacity(0.3),
+                                            blurRadius: 5,
+                                            offset: const Offset(0, 6),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      s == ComplaintStatus.notStarted
+                                          ? Icons.hourglass_empty
+                                          : s == ComplaintStatus.working
+                                          ? Icons.build_circle
+                                          : Icons.check_circle,
+                                      size: 18,
+                                      color: isSelected ? color : Colors.grey,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _statusText(s),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected
+                                            ? color
+                                            : Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           );
                         }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              /// 🔹 Complaint Details
+              const SizedBox(height: 20),
+
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.white, const Color(0xFFFAFBFF)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF3F51B5).withOpacity(0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: const Color(0xFF6366F1).withOpacity(0.1),
+                    width: 1,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _infoRow("Submitted By", widget.complaint.givenBy),
+                      _infoRow("Role", widget.complaint.role),
+                      _infoRow("Department", widget.complaint.department),
+                      _infoRow("Category", widget.complaint.category),
+                      _infoRow(
+                        "Submitted On",
+                        DateFormat(
+                          'dd MMM yyyy • hh:mm a',
+                        ).format(widget.complaint.createdAt),
                       ),
                     ],
                   ),

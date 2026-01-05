@@ -6,28 +6,6 @@ import '../models/complaint.dart';
 class ViewComplaintScreen extends StatelessWidget {
   const ViewComplaintScreen({super.key});
 
-  Color _statusColor(ComplaintStatus status) {
-    switch (status) {
-      case ComplaintStatus.notStarted:
-        return Colors.grey;
-      case ComplaintStatus.working:
-        return Colors.orange;
-      case ComplaintStatus.completed:
-        return Colors.green;
-    }
-  }
-
-  String _statusText(ComplaintStatus status) {
-    switch (status) {
-      case ComplaintStatus.notStarted:
-        return "Not Started";
-      case ComplaintStatus.working:
-        return "In Progress";
-      case ComplaintStatus.completed:
-        return "Completed";
-    }
-  }
-
   Widget _complaintCard(
     BuildContext context,
     Complaint complaint,
@@ -43,7 +21,7 @@ class ViewComplaintScreen extends StatelessWidget {
         statusText = "Completed";
         break;
       case ComplaintStatus.working:
-        statusColor = Colors.orange;
+        statusColor = Colors.orangeAccent;
         statusText = "In Progress";
         break;
       default:
@@ -238,6 +216,8 @@ class ViewComplaintScreen extends StatelessWidget {
               }
 
               final complaints = snapshot.data!;
+
+              complaints.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
               return ListView.builder(
                 itemBuilder: (context, index) {
