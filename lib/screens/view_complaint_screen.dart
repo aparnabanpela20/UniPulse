@@ -81,28 +81,45 @@ class ViewComplaintScreen extends StatelessWidget {
           Row(
             children: [
               // Upvote button
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.arrow_drop_up,
-                      size: 20,
-                      color: Colors.black54,
+                  onTap: () {
+                    context.read<ComplaintProvider>().upvoteComplaint(
+                      complaint.id,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
                     ),
-                    Text(
-                      complaint.upvotes.toString(),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    decoration: BoxDecoration(
+                      color:
+                          context.read<ComplaintProvider>().hasUserUpvoted(
+                            complaint.id,
+                          )
+                          ? Colors.green.withOpacity(0.15)
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
                     ),
-                  ],
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.arrow_drop_up,
+                          size: 20,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          complaint.upvotes.toString(),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
 
