@@ -1,3 +1,5 @@
+[![APK Download](https://img.shields.io/badge/APK-Download-green)](https://drive.google.com/file/d/1UsaI0oKhuaHzc_3z6ZfkjrLeAZaPeqTX/view?usp=drive_link)
+
 # UniPulse – AI-Powered Campus Feedback & Insight System
 
 **Team BugOff | Campus Sigma Hackathon**
